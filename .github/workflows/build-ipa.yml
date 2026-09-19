@@ -30,6 +30,7 @@ jobs:
           xcodebuild archive \
             -project Kognit.xcodeproj \
             -scheme Kognit \
+            -destination 'generic/platform=iOS' \
             -archivePath build/Kognit.xcarchive \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
