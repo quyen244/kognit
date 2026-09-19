@@ -21,11 +21,13 @@ struct KognitApp: App {
                 UserSettingsEntity.self
             ])
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-            self.container = try ModelContainer(for: schema, configurations: [config])
+            let modelContainer = try ModelContainer(for: schema, configurations: [config])
+            self.container = modelContainer
 
             // Seed initial sample data if empty
+            let context = modelContainer.mainContext
             Task { @MainActor in
-                SampleDataService.populateInitialDataIfNeeded(context: container.mainContext)
+                SampleDataService.populateInitialDataIfNeeded(context: context)
             }
         } catch {
             fatalError("Could not initialize SwiftData ModelContainer: \(error)")
