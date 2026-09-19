@@ -18,24 +18,13 @@ jobs:
       - name: Build for iOS Simulator
         run: |
           cd ios
-          SDK_PATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
-          echo "Using iPhoneSimulator SDK at $SDK_PATH"
+          swift build -c release --triple arm64-apple-ios18.0-simulator -Xswiftc -sdk -Xswiftc $(xcrun --sdk iphonesimulator --show-sdk-path) 2>&1 | tee build.log || swift build -c release 2>&1 | tee -a build.log
           
-          SWIFT_FILES=$(find Kognit -name "*.swift")
-          
-          swiftc -target arm64-apple-ios18.0-simulator \
-            -sdk "$SDK_PATH" \
-            -parse-as-library \
-            -framework SwiftUI \
-            -framework SwiftData \
-            -framework VisionKit \
-            -framework AVFoundation \
-            -emit-executable \
-            -o Kognit \
-            $SWIFT_FILES
+          BIN_PATH=$(find .build -type f -name Kognit -perm +111 | head -n 1)
+          echo "Found binary at: $BIN_PATH"
           
           mkdir -p build/Kognit.app
-          cp Kognit build/Kognit.app/Kognit
+          cp "$BIN_PATH" build/Kognit.app/Kognit
           cp Info.plist build/Kognit.app/Info.plist
           
           cd build
@@ -46,3 +35,10 @@ jobs:
         with:
           name: Kognit-iOS-Simulator
           path: ios/build/Kognit-Simulator.app.zip
+
+      - name: Upload Build Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Simulator-Build-Log
+          path: ios/build.log

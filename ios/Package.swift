@@ -8,14 +8,14 @@ let package = Package(
         .macOS(.v15)
     ],
     products: [
-        .library(
+        .executable(
             name: "Kognit",
             targets: ["Kognit"]
         )
     ],
     dependencies: [],
     targets: [
-        .target(
+        .executableTarget(
             name: "Kognit",
             dependencies: [],
             path: "Kognit"
