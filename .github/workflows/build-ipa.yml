@@ -1,0 +1,47 @@
+name: Build iOS IPA Package
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 15.4
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Compile iOS App & Package IPA
+        run: |
+          cd ios
+          SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+          echo "Using iPhoneOS SDK at $SDK_PATH"
+          
+          SWIFT_FILES=$(find Kognit -name "*.swift")
+          
+          swiftc -target arm64-apple-ios17.0 \
+            -sdk "$SDK_PATH" \
+            -framework SwiftUI \
+            -framework SwiftData \
+            -framework VisionKit \
+            -framework AVFoundation \
+            -emit-executable \
+            -o Kognit \
+            $SWIFT_FILES
+          
+          mkdir -p Payload/Kognit.app
+          cp Kognit Payload/Kognit.app/Kognit
+          cp Info.plist Payload/Kognit.app/Info.plist
+          
+          zip -r Kognit.ipa Payload
+          echo "IPA build complete: $(ls -lh Kognit.ipa)"
+
+      - name: Upload Kognit IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kognit-iOS-IPA
+          path: ios/Kognit.ipa
