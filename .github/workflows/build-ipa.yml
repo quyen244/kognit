@@ -26,13 +26,18 @@ jobs:
       - name: Build Xcode Archive
         run: |
           cd ios
+          set -o pipefail
           xcodebuild archive \
             -project Kognit.xcodeproj \
             -scheme Kognit \
             -archivePath build/Kognit.xcarchive \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-archive.log || {
+              echo "=== XCODEBUILD ARCHIVE ERROR SUMMARY ==="
+              grep -E "error:" xcodebuild-archive.log || tail -n 60 xcodebuild-archive.log
+              exit 1
+            }
 
       - name: Package Unsigned IPA
         run: |
@@ -47,3 +52,10 @@ jobs:
         with:
           name: Kognit-iOS-IPA
           path: ios/Kognit.ipa
+
+      - name: Upload Archive Build Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: archive-xcodebuild-log
+          path: ios/xcodebuild-archive.log

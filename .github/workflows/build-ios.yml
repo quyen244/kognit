@@ -26,6 +26,7 @@ jobs:
       - name: Build Simulator App
         run: |
           cd ios
+          set -o pipefail
           xcodebuild \
             -project Kognit.xcodeproj \
             -scheme Kognit \
@@ -34,7 +35,11 @@ jobs:
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild.log || {
+              echo "=== XCODEBUILD ERROR SUMMARY ==="
+              grep -E "error:" xcodebuild.log || tail -n 60 xcodebuild.log
+              exit 1
+            }
 
       - name: Package Simulator App Bundle
         run: |
@@ -50,3 +55,10 @@ jobs:
         with:
           name: Kognit-iOS-Simulator
           path: ios/sim-build/Kognit-Simulator.app.zip
+
+      - name: Upload Build Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulator-xcodebuild-log
+          path: ios/xcodebuild.log
