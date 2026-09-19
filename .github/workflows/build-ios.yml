@@ -18,11 +18,14 @@ jobs:
       - name: Install xcodegen
         run: brew install xcodegen
 
-      - name: Generate Xcode Project & Build Simulator App
+      - name: Generate Xcode Project
         run: |
           cd ios
-          xcodegen generate
-          
+          xcodegen generate --spec project.yml
+
+      - name: Build Simulator App
+        run: |
+          cd ios
           xcodebuild \
             -project Kognit.xcodeproj \
             -scheme Kognit \
@@ -32,10 +35,12 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
-          
+
+      - name: Package Simulator App Bundle
+        run: |
+          cd ios
           APP_PATH=$(find build/Build/Products -name "Kognit.app" -type d | head -n 1)
           echo "Found simulator app at: $APP_PATH"
-          
           mkdir -p sim-build
           cp -r "$APP_PATH" sim-build/Kognit.app
           cd sim-build && zip -r Kognit-Simulator.app.zip Kognit.app

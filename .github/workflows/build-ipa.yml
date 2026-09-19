@@ -18,11 +18,14 @@ jobs:
       - name: Install xcodegen
         run: brew install xcodegen
 
-      - name: Generate Xcode Project & Build Archive
+      - name: Generate Xcode Project
         run: |
           cd ios
-          xcodegen generate
-          
+          xcodegen generate --spec project.yml
+
+      - name: Build Xcode Archive
+        run: |
+          cd ios
           xcodebuild archive \
             -project Kognit.xcodeproj \
             -scheme Kognit \
@@ -30,7 +33,10 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
-          
+
+      - name: Package Unsigned IPA
+        run: |
+          cd ios
           mkdir -p Payload
           cp -r build/Kognit.xcarchive/Products/Applications/Kognit.app Payload/
           zip -r Kognit.ipa Payload/
