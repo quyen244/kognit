@@ -15,18 +15,28 @@ jobs:
       - name: Set up Xcode 16
         run: sudo xcode-select -s /Applications/Xcode_16.0.app || sudo xcode-select -s /Applications/Xcode.app
 
-      - name: Compile iOS App & Package IPA
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project & Build IPA
         run: |
           cd ios
-          swift build -c release --triple arm64-apple-ios18.0 -Xswiftc -sdk -Xswiftc $(xcrun --sdk iphoneos --show-sdk-path) 2>&1 | tee build.log || swift build -c release 2>&1 | tee -a build.log
+          xcodegen generate
           
-          BIN_PATH=$(find .build -type f -name Kognit -perm +111 | head -n 1)
-          echo "Found binary at: $BIN_PATH"
+          xcodebuild -project Kognit.xcodeproj \
+            -scheme Kognit \
+            -destination 'generic/platform=iOS' \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
           
-          mkdir -p Payload/Kognit.app
-          cp "$BIN_PATH" Payload/Kognit.app/Kognit
-          cp Info.plist Payload/Kognit.app/Info.plist
+          APP_PATH=$(find build -name "Kognit.app" -type d | head -n 1)
+          echo "Found app at: $APP_PATH"
           
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/Kognit.app
           zip -r Kognit.ipa Payload
           echo "IPA build complete: $(ls -lh Kognit.ipa)"
 
@@ -35,10 +45,3 @@ jobs:
         with:
           name: Kognit-iOS-IPA
           path: ios/Kognit.ipa
-
-      - name: Upload Build Log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: IPA-Build-Log
-          path: ios/build.log
