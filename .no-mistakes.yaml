@@ -1,0 +1,8 @@
+# Kognit no-mistakes configuration
+
+commands:
+  test: 'pytest backend/tests'
+
+test:
+  evidence:
+    store_in_repo: true
