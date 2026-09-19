@@ -112,7 +112,8 @@ public struct DocumentIngestionView: View {
     }
 
     // MARK: - Camera Scanner Section
-    private var cameraScannerSection: View {
+    @ViewBuilder
+    private var cameraScannerSection: some View {
         VStack(spacing: 12) {
             // Viewfinder Container
             ZStack {
@@ -292,7 +293,8 @@ public struct DocumentIngestionView: View {
     }
 
     // MARK: - File Picker Section
-    private var filePickerSection: View {
+    @ViewBuilder
+    private var filePickerSection: some View {
         VStack(spacing: 14) {
             // Drop Zone Card
             Button(action: {

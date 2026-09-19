@@ -30,7 +30,7 @@ jobs:
           xcodebuild \
             -project Kognit.xcodeproj \
             -scheme Kognit \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination 'generic/platform=iOS Simulator' \
             -configuration Release \
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="" \

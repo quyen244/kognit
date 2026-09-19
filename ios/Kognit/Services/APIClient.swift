@@ -199,7 +199,7 @@ public final class KognitAPIClient: APIClientProtocol, Sendable {
         }
 
         do {
-            return try JSONDecoder().decode(IngestionJobResponse.self, data: data)
+            return try JSONDecoder().decode(IngestionJobResponse.self, from: data)
         } catch {
             throw APIError.decodingError
         }
@@ -233,7 +233,7 @@ public final class KognitAPIClient: APIClientProtocol, Sendable {
                 throw APIError.serverError(httpResponse.statusCode, "Failed to poll job status")
             }
 
-            let statusUpdate = try JSONDecoder().decode(JobStatusUpdate.self, data: data)
+            let statusUpdate = try JSONDecoder().decode(JobStatusUpdate.self, from: data)
             onUpdate(statusUpdate)
 
             if statusUpdate.stage == .complete {
@@ -255,7 +255,7 @@ public final class KognitAPIClient: APIClientProtocol, Sendable {
         let resultURL = baseURL.appendingPathComponent("jobs/\(jobId)/result")
         let (data, _) = try await urlSession.data(from: resultURL)
         // In real backend, decode IngestionSynthesisResult JSON
-        return try JSONDecoder().decode(RemoteSynthesisPayload.self, data: data).toResult(jobId: jobId)
+        return try JSONDecoder().decode(RemoteSynthesisPayload.self, from: data).toResult(jobId: jobId)
     }
 
     // MARK: - Simulation Mode (Full realistic progress emulation)
