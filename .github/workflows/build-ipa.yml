@@ -35,8 +35,14 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild-archive.log || {
-              echo "=== XCODEBUILD ARCHIVE ERROR SUMMARY ==="
-              grep -E "error:" xcodebuild-archive.log || tail -n 60 xcodebuild-archive.log
+              echo "## ❌ Xcodebuild Archive Compilation Failed" >> $GITHUB_STEP_SUMMARY
+              echo '```text' >> $GITHUB_STEP_SUMMARY
+              grep -E "error:" xcodebuild-archive.log >> $GITHUB_STEP_SUMMARY || tail -n 80 xcodebuild-archive.log >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+
+              grep -E "error:" xcodebuild-archive.log | while IFS= read -r line; do
+                echo "::error::$line"
+              done
               exit 1
             }
 

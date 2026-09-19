@@ -36,8 +36,14 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee xcodebuild.log || {
-              echo "=== XCODEBUILD ERROR SUMMARY ==="
-              grep -E "error:" xcodebuild.log || tail -n 60 xcodebuild.log
+              echo "## ❌ Xcodebuild Simulator Compilation Failed" >> $GITHUB_STEP_SUMMARY
+              echo '```text' >> $GITHUB_STEP_SUMMARY
+              grep -E "error:" xcodebuild.log >> $GITHUB_STEP_SUMMARY || tail -n 80 xcodebuild.log >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              
+              grep -E "error:" xcodebuild.log | while IFS= read -r line; do
+                echo "::error::$line"
+              done
               exit 1
             }
 
