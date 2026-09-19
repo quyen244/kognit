@@ -23,22 +23,22 @@ jobs:
           cd ios
           xcodegen generate
           
-          xcodebuild -project Kognit.xcodeproj \
+          xcodebuild \
+            -project Kognit.xcodeproj \
             -scheme Kognit \
             -destination 'generic/platform=iOS Simulator' \
             -configuration Release \
             -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
+            CODE_SIGNING_ALLOWED=NO
           
-          APP_PATH=$(find build -name "Kognit.app" -type d | head -n 1)
-          echo "Found app at: $APP_PATH"
+          APP_PATH=$(find build/Build/Products -name "Kognit.app" -type d | head -n 1)
+          echo "Found simulator app at: $APP_PATH"
           
           mkdir -p sim-build
           cp -r "$APP_PATH" sim-build/Kognit.app
-          cd sim-build
-          zip -r Kognit-Simulator.app.zip Kognit.app
+          cd sim-build && zip -r Kognit-Simulator.app.zip Kognit.app
 
       - name: Upload iOS Simulator Build
         uses: actions/upload-artifact@v4

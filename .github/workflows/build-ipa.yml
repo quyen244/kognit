@@ -18,26 +18,22 @@ jobs:
       - name: Install xcodegen
         run: brew install xcodegen
 
-      - name: Generate Xcode Project & Build IPA
+      - name: Generate Xcode Project & Build Archive
         run: |
           cd ios
           xcodegen generate
           
-          xcodebuild -project Kognit.xcodeproj \
+          xcodebuild archive \
+            -project Kognit.xcodeproj \
             -scheme Kognit \
-            -destination 'generic/platform=iOS' \
-            -configuration Release \
-            -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO \
+            -archivePath build/Kognit.xcarchive \
+            CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY=""
-          
-          APP_PATH=$(find build -name "Kognit.app" -type d | head -n 1)
-          echo "Found app at: $APP_PATH"
+            CODE_SIGNING_ALLOWED=NO
           
           mkdir -p Payload
-          cp -r "$APP_PATH" Payload/Kognit.app
-          zip -r Kognit.ipa Payload
+          cp -r build/Kognit.xcarchive/Products/Applications/Kognit.app Payload/
+          zip -r Kognit.ipa Payload/
           echo "IPA build complete: $(ls -lh Kognit.ipa)"
 
       - name: Upload Kognit IPA Artifact
